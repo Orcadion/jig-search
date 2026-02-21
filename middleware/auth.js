@@ -1,19 +1,24 @@
+const express = require("express");
 const jwt = require("jsonwebtoken");
+const router = express.Router();
 
-function authMiddleware(req, res, next) {
-  const token = req.headers.authorization?.split(" ")[1];
+router.post("/login", (req, res) => {
+  const { username, password } = req.body;
 
-  if (!token) {
-    return res.status(401).json({ message: "Unauthorized" });
+  const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+  if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ message: "Invalid credentials" });
   }
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (err) {
-    return res.status(403).json({ message: "Invalid Token" });
-  }
-}
+  const token = jwt.sign(
+    { username, role: "admin" },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
 
-module.exports = authMiddleware;
+  res.json({ token });
+});
+
+module.exports = router;

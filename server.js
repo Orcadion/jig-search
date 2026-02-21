@@ -43,7 +43,15 @@ app.use(limiter);
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/search", require("./routes/search"));
 app.use("/api/pdf", require("./routes/pdf"));
-app.use("/api/admin", authMiddleware, require("./routes/admin"));
+
+const adminOnly = require("./middleware/adminOnly");
+
+app.use(
+  "/api/admin",
+  authMiddleware,
+  adminOnly,
+  require("./routes/admin")
+);
 
 // =====================
 // Health Route

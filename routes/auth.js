@@ -5,18 +5,20 @@ const router = express.Router();
 router.post("/login", (req, res) => {
   const { username, password } = req.body;
 
-  // لاحقًا هنربطه بقاعدة بيانات
-  if (username === "admin" && password === "1234") {
-    const token = jwt.sign(
-      { username },
-      process.env.JWT_SECRET,
-      { expiresIn: "8h" }
-    );
+  const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
-    return res.json({ token });
+  if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ message: "Invalid credentials" });
   }
 
-  res.status(401).json({ message: "Invalid credentials" });
+  const token = jwt.sign(
+    { username, role: "admin" },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+
+  res.json({ token });
 });
 
 module.exports = router;
