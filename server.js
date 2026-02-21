@@ -9,15 +9,16 @@ const cron = require("node-cron");
 const path = require("path");
 
 const authMiddleware = require("./middleware/auth");
+const adminOnly = require("./middleware/adminOnly");
 const syncDrive = require("./services/driveSyncService");
 
 const app = express();
 
 // =====================
-// Middlewares
+// Basic Middlewares
 // =====================
 
-app.use(cors()); // نسيبه دلوقتي عشان ما نكسرش حاجة
+app.use(cors());
 
 app.use(
   helmet({
@@ -30,11 +31,25 @@ app.use(
 
 app.use(express.json());
 
-const limiter = rateLimit({
+// =====================
+// Health Route (قبل أي rate limit)
+// =====================
+
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
+// =====================
+// Rate Limiter (API only)
+// =====================
+
+const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
 });
-app.use(limiter);
+
+// نطبقه بس على /api
+app.use("/api", apiLimiter);
 
 // =====================
 // API Routes
@@ -44,8 +59,6 @@ app.use("/api/auth", require("./routes/auth"));
 app.use("/api/search", require("./routes/search"));
 app.use("/api/pdf", require("./routes/pdf"));
 
-const adminOnly = require("./middleware/adminOnly");
-
 app.use(
   "/api/admin",
   authMiddleware,
@@ -54,15 +67,7 @@ app.use(
 );
 
 // =====================
-// Health Route
-// =====================
-
-app.get("/health", (req, res) => {
-  res.status(200).send("OK");
-});
-
-// =====================
-// Serve Flutter Web (لو موجود)
+// Serve Flutter Web
 // =====================
 
 const buildPath = path.join(__dirname, "build/web");
@@ -100,7 +105,7 @@ async function startServer() {
 startServer();
 
 // =====================
-// Auto Sync
+// Auto Sync (كل ساعة)
 // =====================
 
 cron.schedule("0 * * * *", async () => {
