@@ -24579,7 +24579,7 @@ WX(a){var s=0,r=A.U(t.j),q,p,o
 var $async$WX=A.V(function(b,c){if(b===1)return A.R(c,r)
 for(;;)switch(s){case 0:p=t.N
 s=3
-return A.W(A.axs(A.fy("/api/api/search/"+a),A.an(["Authorization","Bearer "+A.k($.arN)],p,p)),$async$WX)
+return A.W(A.axs(A.fy("/api/search/"+a),A.an(["Authorization","Bearer "+A.k($.arN)],p,p)),$async$WX)
 case 3:o=c
 if(o.b===200){q=B.cn.DK(0,A.axo(A.awu(o.e)).f5(0,o.w),null)
 s=1
@@ -78141,7 +78141,7 @@ A.ai9.prototype={
 $0(){this.a.r="Invalid Credentials"},
 $S:0}
 A.rv.prototype={
-N(a){var s,r,q,p=null,o=this.c,n="/api/api/pdf/"+o
+N(a){var s,r,q,p=null,o=this.c,n="/api/pdf/"+o
 A.aqR("PDF URL = "+n)
 s="pdf-viewer-"+B.c.gu(o)
 $.arf()
