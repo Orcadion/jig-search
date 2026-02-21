@@ -24885,7 +24885,7 @@ case 1:return A.R(q,r)}})
 return A.S($async$Xr,r)},
 XJ(a,b){var s=0,r=A.T(t.y),q,p,o,n,m
 var $async$XJ=A.U(function(c,d){if(c===1)return A.Q(d,r)
-for(;;)switch(s){case 0:p=A.f5("/api/api/auth/login")
+for(;;)switch(s){case 0:p=A.f5("/api/auth/login")
 o=t.N
 n=A.aq(["Content-Type","application/json"],o,o)
 s=3
