@@ -21,6 +21,7 @@ app.use(cors()); // نسيبه دلوقتي عشان ما نكسرش حاجة
 
 app.use(
   helmet({
+    contentSecurityPolicy: false,
     crossOriginResourcePolicy: false,
     crossOriginEmbedderPolicy: false,
     crossOriginOpenerPolicy: false,
