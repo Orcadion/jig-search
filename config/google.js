@@ -1,28 +1,28 @@
 const { google } = require("googleapis");
 
-// نتأكد إن المتغير موجود
 if (!process.env.GOOGLE_SERVICE_ACCOUNT) {
-  throw new Error("❌ GOOGLE_SERVICE_ACCOUNT is not set in environment variables");
+  throw new Error("❌ GOOGLE_SERVICE_ACCOUNT is not set");
 }
 
-// نحول الـ JSON string لكائن
-const serviceAccount = JSON.parse(
-  process.env.GOOGLE_SERVICE_ACCOUNT
-);
+let serviceAccount;
 
-// إصلاح مشكلة private_key في Render
-serviceAccount.private_key =
-  serviceAccount.private_key.replace(/\\n/g, "\n");
+try {
+  serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
+} catch (err) {
+  throw new Error("❌ Invalid GOOGLE_SERVICE_ACCOUNT JSON");
+}
 
-// إعداد المصادقة
+// إصلاح private_key
+if (serviceAccount.private_key) {
+  serviceAccount.private_key =
+    serviceAccount.private_key.replace(/\\n/g, "\n");
+}
+
 const auth = new google.auth.GoogleAuth({
   credentials: serviceAccount,
-  scopes: [
-    "https://www.googleapis.com/auth/drive.readonly"
-  ],
+  scopes: ["https://www.googleapis.com/auth/drive.readonly"],
 });
 
-// إنشاء Drive instance
 const drive = google.drive({
   version: "v3",
   auth,

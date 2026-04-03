@@ -92,7 +92,7 @@ async function startServer() {
     await mongoose.connect(process.env.MONGO_URI);
     console.log("✅ MongoDB Connected");
 
-    const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 8080;
 
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
@@ -110,5 +110,10 @@ startServer();
 
 cron.schedule("0 * * * *", async () => {
   console.log("🔄 Auto Sync Running...");
-  await syncDrive(process.env.DRIVE_FOLDER_ID);
+
+  try {
+    await syncDrive(process.env.DRIVE_FOLDER_ID);
+  } catch (err) {
+    console.error("❌ Sync Error:", err.message);
+  }
 });

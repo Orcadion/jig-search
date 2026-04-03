@@ -20,8 +20,11 @@ async function scanFolder(folderId) {
     for (const item of items) {
       // لو فولدر → ندخل فيه
       if (item.mimeType === "application/vnd.google-apps.folder") {
-        await scanFolder(item.id);
-      }
+try {
+  await scanFolder(item.id);
+} catch (err) {
+  console.error("❌ Folder scan error:", err.message);
+}      }
 
       // لو PDF → نحضره للـ bulk
       if (item.mimeType === "application/pdf") {
