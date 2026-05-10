@@ -1,13 +1,16 @@
 const drive = require("../config/google");
 const File = require("../models/File");
 
+const existingDriveFileIds = new Set();
+
 async function scanFolder(folderId) {
   let pageToken = null;
 
   do {
     const res = await drive.files.list({
       q: `'${folderId}' in parents and trashed=false`,
-      fields: "nextPageToken, files(id, name, mimeType, parents, createdTime)",
+      fields:
+        "nextPageToken, files(id, name, mimeType, parents, createdTime)",
       pageSize: 1000,
       pageToken,
       supportsAllDrives: true,
@@ -20,14 +23,13 @@ async function scanFolder(folderId) {
     for (const item of items) {
       // لو فولدر → ندخل فيه
       if (item.mimeType === "application/vnd.google-apps.folder") {
-try {
-  await scanFolder(item.id);
-} catch (err) {
-  console.error("❌ Folder scan error:", err.message);
-}      }
+        await scanFolder(item.id);
+      }
 
-      // لو PDF → نحضره للـ bulk
+      // لو PDF
       if (item.mimeType === "application/pdf") {
+        existingDriveFileIds.add(item.id);
+
         const cleanName = item.name.replace(".pdf", "");
         const parts = cleanName.split("-");
 
@@ -51,7 +53,6 @@ try {
       }
     }
 
-    // تنفيذ bulk مرة واحدة بدل مئات العمليات
     if (bulkOps.length > 0) {
       await File.bulkWrite(bulkOps);
       console.log(`⚡ Synced ${bulkOps.length} files`);
@@ -63,7 +64,20 @@ try {
 
 async function syncDrive(rootFolderId) {
   console.log("🔄 Starting Recursive Sync...");
+
+  existingDriveFileIds.clear();
+
   await scanFolder(rootFolderId);
+
+  // حذف الملفات المحذوفة من Google Drive
+  await File.deleteMany({
+    fileId: {
+      $nin: Array.from(existingDriveFileIds),
+    },
+  });
+
+  console.log("🗑 Deleted removed files from MongoDB");
+
   console.log("✅ Sync Completed");
 }
 
